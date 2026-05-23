@@ -1,0 +1,716 @@
+/* ============================================================
+   VOYAGER — Photography Portfolio
+   Style: Bauhaus + Retro-Futurism
+   Palette: Deep blue-black + Amber/Copper + Warm Orange
+   ============================================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+  --bg-primary: #1A1A2E;
+  --bg-secondary: #16213E;
+  --bg-card: #0F3460;
+  --color-amber: #D4A574;
+  --color-orange: #E07A3A;
+  --color-copper: #B8860B;
+  --color-text: #EAEAEA;
+  --color-text-muted: #9A9AB0;
+  --color-dark: #0D0D1A;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --border-radius: 4px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* --- Film Grain Overlay --- */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* --- Scanline Effect (very subtle) --- */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.015) 2px,
+    rgba(0, 0, 0, 0.015) 4px
+  );
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: var(--color-amber);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--color-orange);
+}
+
+/* --- Header --- */
+.site-header {
+  padding: 3rem 2rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border: 2px solid var(--color-amber);
+  border-radius: 50%;
+  opacity: 0.15;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--color-orange);
+  opacity: 0.1;
+}
+
+.site-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: var(--color-amber);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+}
+
+.site-title::after {
+  content: '';
+  display: block;
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-orange), transparent);
+  margin: 0.5rem auto 0;
+}
+
+.site-tagline {
+  font-family: var(--font-heading);
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  color: var(--color-text-muted);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-top: 0.8rem;
+}
+
+/* --- Bauhaus Geometric Decorations --- */
+.bauhaus-deco {
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.06;
+}
+
+.bauhaus-deco--circle {
+  width: 300px;
+  height: 300px;
+  border: 3px solid var(--color-amber);
+  border-radius: 50%;
+  top: -100px;
+  right: -100px;
+}
+
+.bauhaus-deco--triangle {
+  width: 0;
+  height: 0;
+  border-left: 80px solid transparent;
+  border-right: 80px solid transparent;
+  border-bottom: 140px solid var(--color-orange);
+  bottom: 10%;
+  left: -40px;
+}
+
+.bauhaus-deco--square {
+  width: 150px;
+  height: 150px;
+  border: 3px solid var(--color-amber);
+  transform: rotate(15deg);
+  bottom: 20%;
+  right: 5%;
+}
+
+/* --- Album Grid (Vinyl Wall) --- */
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2.5rem;
+  padding: 2rem 3rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- Vinyl Record Card --- */
+.vinyl-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.vinyl-card:hover {
+  transform: translateY(-4px);
+}
+
+.vinyl-card__sleeve {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  background: var(--bg-secondary);
+  border: 2px solid rgba(212, 165, 116, 0.2);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.vinyl-card__cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition);
+}
+
+.vinyl-card:hover .vinyl-card__cover {
+  transform: scale(1.02);
+}
+
+/* Vinyl disc removed */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Card info */
+.vinyl-card__info {
+  padding: 1rem 0.5rem 0;
+}
+
+.vinyl-card__title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-amber);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vinyl-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.vinyl-card__location {
+  font-style: italic;
+}
+
+.vinyl-card__count {
+  background: rgba(212, 165, 116, 0.15);
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+/* --- Bauhaus corner decorations on cards --- */
+.vinyl-card__sleeve::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid var(--color-amber);
+  border-left: 2px solid var(--color-amber);
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.vinyl-card__sleeve::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-bottom: 2px solid var(--color-amber);
+  border-right: 2px solid var(--color-amber);
+  z-index: 2;
+  opacity: 0.6;
+}
+
+/* --- Album Page Header --- */
+.album-header {
+  padding: 2rem 2rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.album-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  border-radius: var(--border-radius);
+  transition: all var(--transition);
+}
+
+.album-header__back:hover {
+  color: var(--color-amber);
+  border-color: var(--color-amber);
+}
+
+.album-header__title {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: var(--color-amber);
+  letter-spacing: 0.1em;
+}
+
+.album-header__subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.album-header__details {
+  margin-left: auto;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Masonry / Waterfall Grid --- */
+.masonry-grid {
+  columns: 3;
+  column-gap: 1.2rem;
+  padding: 1rem 3rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1.2rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.masonry-item:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 30px rgba(212, 165, 116, 0.15);
+}
+
+.masonry-item img {
+  width: 100%;
+  display: block;
+  transition: filter var(--transition);
+}
+
+.masonry-item:hover img {
+  filter: brightness(1.05);
+}
+
+.masonry-item__caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem 1rem 0.8rem;
+  background: linear-gradient(transparent, rgba(13, 13, 26, 0.85));
+  font-size: 0.85rem;
+  color: var(--color-text);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--transition);
+}
+
+.masonry-item:hover .masonry-item__caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Lightbox --- */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(13, 13, 26, 0.95);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lightbox__img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 60px rgba(212, 165, 116, 0.1);
+}
+
+.lightbox__caption {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 2rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+  background: none;
+  border: none;
+  font-family: var(--font-heading);
+}
+
+.lightbox__close:hover {
+  color: var(--color-amber);
+}
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+  background: none;
+  border: none;
+  padding: 1rem;
+}
+
+.lightbox__nav:hover {
+  color: var(--color-amber);
+}
+
+.lightbox__nav--prev {
+  left: 1rem;
+}
+
+.lightbox__nav--next {
+  right: 1rem;
+}
+
+.lightbox__counter {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* --- Footer --- */
+.site-footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(212, 165, 116, 0.1);
+  position: relative;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--color-amber);
+}
+
+.site-footer__text {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+}
+
+.site-footer__social {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.site-footer__social a {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: var(--font-heading);
+  transition: color var(--transition);
+}
+
+.site-footer__social a:hover {
+  color: var(--color-amber);
+}
+
+/* --- Page Transition --- */
+.page-content {
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Staggered animation for grid items --- */
+.vinyl-card {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.masonry-item {
+  opacity: 0;
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+/* --- Placeholder image styling (for demo) --- */
+.placeholder-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vinyl-card .placeholder-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+}
+
+.masonry-item .placeholder-img {
+  aspect-ratio: var(--ratio, 4/3);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .album-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .masonry-grid {
+    columns: 2;
+    padding: 1rem 2rem 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-header {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .album-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    padding: 1rem 1.5rem 3rem;
+  }
+
+  .masonry-grid {
+    columns: 2;
+    column-gap: 0.8rem;
+    padding: 1rem 1.5rem 3rem;
+  }
+
+  .masonry-item {
+    margin-bottom: 0.8rem;
+  }
+
+  .album-header {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .album-header__details {
+    margin-left: 0;
+    text-align: left;
+    width: 100%;
+  }
+
+  .lightbox__nav {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .album-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .vinyl-card__info {
+    padding: 0.6rem 0.2rem 0;
+  }
+
+  .vinyl-card__title {
+    font-size: 0.85rem;
+  }
+
+  .vinyl-card__meta {
+    font-size: 0.7rem;
+  }
+
+  .masonry-grid {
+    columns: 1;
+    padding: 1rem;
+  }
+
+  .site-title {
+    letter-spacing: 0.1em;
+  }
+
+  .site-tagline {
+    letter-spacing: 0.15em;
+    font-size: 0.7rem;
+  }
+}
+
+/* --- Loading state --- */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.loading__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(212, 165, 116, 0.2);
+  border-top-color: var(--color-amber);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
