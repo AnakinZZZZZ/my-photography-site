@@ -22,6 +22,7 @@ const ALBUMS = [
     date: "2020.10",
     location: "云南 / 梅里雪山",
     cover: "images/covers/yunnan-meili.jpg",
+    coords: { lat: 28.4, lng: 98.7 },
     photoCount: 3,
     photos: [
       { src: "images/photos/yunnan-meili/梅里雪山-仙女峰.jpg", caption: "仙女峰" },
@@ -36,6 +37,7 @@ const ALBUMS = [
     date: "2024.10",
     location: "斯里兰卡",
     cover: "images/covers/sri-lanka.jpg",
+    coords: { lat: 7.9, lng: 80.8 },
     photoCount: 5,
     photos: [
       { src: "images/photos/sri-lanka/Wild Coast Tented Lodge.jpg", caption: "Wild Coast Tented Lodge" },
