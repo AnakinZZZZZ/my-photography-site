@@ -278,6 +278,25 @@
     const tooltipDate = document.getElementById('tooltipDate');
     const container = document.querySelector('.travel-map__container');
 
+    // Track which album the tooltip is currently showing (for mobile)
+    let activeAlbumId = null;
+
+    // Close tooltip when tapping anywhere else on the map
+    container.addEventListener('touchstart', (e) => {
+      // If tap is not on a marker or tooltip, close tooltip
+      if (!e.target.closest('.travel-map__marker') && !e.target.closest('.travel-map__tooltip')) {
+        tooltip.classList.remove('active');
+        activeAlbumId = null;
+      }
+    });
+
+    // Make tooltip clickable on mobile - tap tooltip to navigate
+    tooltip.addEventListener('click', () => {
+      if (activeAlbumId) {
+        window.location.href = `album.html?id=${activeAlbumId}`;
+      }
+    });
+
     ALBUMS.forEach((album, index) => {
       if (!album.coords) return;
 
@@ -306,8 +325,8 @@
       group.appendChild(dot);
       svg.appendChild(group);
 
-      // Hover: show tooltip
-      group.addEventListener('mouseenter', (e) => {
+      // Desktop: hover to show tooltip
+      group.addEventListener('mouseenter', () => {
         tooltipImg.innerHTML = album.cover
           ? `<img src="${album.cover}" alt="${album.title}">`
           : '';
@@ -315,7 +334,6 @@
         tooltipDate.textContent = `${album.date} · ${album.location}`;
 
         // Position tooltip near marker
-        const rect = container.getBoundingClientRect();
         const svgRect = svg.getBoundingClientRect();
         const markerX = (pos.x / width) * svgRect.width;
         const markerY = (pos.y / height) * svgRect.height;
@@ -324,7 +342,8 @@
         let tooltipTop = markerY - 35;
 
         // Keep tooltip inside container
-        if (tooltipLeft + 200 > rect.width) {
+        const containerRect = container.getBoundingClientRect();
+        if (tooltipLeft + 200 > containerRect.width) {
           tooltipLeft = markerX - 200;
         }
         if (tooltipTop < 0) {
@@ -334,39 +353,50 @@
         tooltip.style.left = tooltipLeft + 'px';
         tooltip.style.top = tooltipTop + 'px';
         tooltip.classList.add('active');
+        activeAlbumId = album.id;
       });
 
       group.addEventListener('mouseleave', () => {
         tooltip.classList.remove('active');
+        activeAlbumId = null;
       });
 
-      // Click: navigate to album
+      // Desktop: click to navigate
       group.addEventListener('click', () => {
         window.location.href = `album.html?id=${album.id}`;
       });
 
-      // Mobile: tap to show, tap again to navigate
-      let tapCount = 0;
+      // Mobile: tap marker to show tooltip, tap tooltip to navigate
       group.addEventListener('touchend', (e) => {
         e.preventDefault();
-        tapCount++;
-        if (tapCount === 1) {
-          tooltipImg.innerHTML = album.cover
-            ? `<img src="${album.cover}" alt="${album.title}">`
-            : '';
-          tooltipTitle.textContent = album.title;
-          tooltipDate.textContent = `${album.date} · ${album.location}`;
-          const rect = container.getBoundingClientRect();
-          const svgRect = svg.getBoundingClientRect();
-          const markerX = (pos.x / width) * svgRect.width;
-          const markerY = (pos.y / height) * svgRect.height;
-          tooltip.style.left = (markerX + 15) + 'px';
-          tooltip.style.top = (markerY - 35) + 'px';
-          tooltip.classList.add('active');
-          setTimeout(() => { tapCount = 0; }, 2000);
-        } else if (tapCount >= 2) {
-          window.location.href = `album.html?id=${album.id}`;
+        e.stopPropagation();
+
+        // Show tooltip for this album
+        tooltipImg.innerHTML = album.cover
+          ? `<img src="${album.cover}" alt="${album.title}">`
+          : '';
+        tooltipTitle.textContent = album.title;
+        tooltipDate.textContent = `${album.date} · ${album.location}`;
+
+        const svgRect = svg.getBoundingClientRect();
+        const markerX = (pos.x / width) * svgRect.width;
+        const markerY = (pos.y / height) * svgRect.height;
+
+        let tooltipLeft = markerX + 15;
+        let tooltipTop = markerY - 35;
+
+        const containerRect = container.getBoundingClientRect();
+        if (tooltipLeft + 200 > containerRect.width) {
+          tooltipLeft = markerX - 200;
         }
+        if (tooltipTop < 0) {
+          tooltipTop = markerY + 15;
+        }
+
+        tooltip.style.left = tooltipLeft + 'px';
+        tooltip.style.top = tooltipTop + 'px';
+        tooltip.classList.add('active');
+        activeAlbumId = album.id;
       });
     });
   }

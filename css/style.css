@@ -647,6 +647,8 @@ img {
 .travel-map__tooltip.active {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .travel-map__tooltip-img {
