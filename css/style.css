@@ -696,19 +696,24 @@ img {
   }
 
   .travel-map__marker-dot {
-    r: 10;
+    r: 4;
   }
 
   .travel-map__marker-pulse {
-    r: 10;
+    r: 4;
   }
 
   .travel-map__marker-hit {
-    r: 22;
+    r: 12;
   }
 
   .travel-map__container {
     background: radial-gradient(ellipse at center, rgba(15, 52, 96, 0.3) 0%, rgba(13, 13, 26, 0.6) 100%);
+    touch-action: none;
+  }
+
+  .travel-map__svg {
+    touch-action: none;
   }
 }
 
@@ -728,15 +733,15 @@ img {
   }
 
   .travel-map__marker-dot {
-    r: 12;
+    r: 5;
   }
 
   .travel-map__marker-pulse {
-    r: 12;
+    r: 5;
   }
 
   .travel-map__marker-hit {
-    r: 28;
+    r: 14;
   }
 
   .travel-map__tooltip-img {

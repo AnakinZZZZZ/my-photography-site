@@ -115,6 +115,14 @@
     const width = 1000;
     const height = 500;
 
+    // On mobile: zoom into Eurasia region and enable pan
+    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isMobile) {
+      // Eurasia view: lng 40~140 → x 611~889, lat -10~55 → y 97~278
+      svg.setAttribute('viewBox', '560 80 380 230');
+      setupMapPan(svg, width, height);
+    }
+
     // Always render markers regardless of map load success
     function showMarkers() {
       addMapMarkers(svg, width, height);
@@ -135,6 +143,53 @@
       }
       showMarkers();
     });
+  }
+
+  // --- Mobile map pan support ---
+  function setupMapPan(svg) {
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let viewBox = svg.getAttribute('viewBox').split(' ').map(Number);
+
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isPanning = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        viewBox = svg.getAttribute('viewBox').split(' ').map(Number);
+      }
+    }, { passive: true });
+
+    svg.addEventListener('touchmove', (e) => {
+      if (!isPanning || e.touches.length !== 1) return;
+
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      // Convert pixel movement to viewBox units
+      const svgRect = svg.getBoundingClientRect();
+      const scaleX = viewBox[2] / svgRect.width;
+      const scaleY = viewBox[3] / svgRect.height;
+
+      let newX = viewBox[0] - dx * scaleX;
+      let newY = viewBox[1] - dy * scaleY;
+
+      // Clamp to full map boundaries
+      newX = Math.max(0, Math.min(newX, 1000 - viewBox[2]));
+      newY = Math.max(0, Math.min(newY, 500 - viewBox[3]));
+
+      svg.setAttribute('viewBox', `${newX} ${newY} ${viewBox[2]} ${viewBox[3]}`);
+
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      viewBox[0] = newX;
+      viewBox[1] = newY;
+    }, { passive: true });
+
+    svg.addEventListener('touchend', () => {
+      isPanning = false;
+    }, { passive: true });
   }
 
   function loadGeoJSONMap(svg, width, height) {
@@ -385,7 +440,25 @@
       });
 
       // Mobile: tap marker to show tooltip, tap tooltip to navigate
+      let touchStartPos = null;
+      group.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      }, { passive: true });
+
       group.addEventListener('touchend', (e) => {
+        // Ignore if finger moved (was a pan gesture)
+        if (touchStartPos && e.changedTouches.length === 1) {
+          const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.x);
+          const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.y);
+          if (dx > 10 || dy > 10) {
+            touchStartPos = null;
+            return; // Was a pan, not a tap
+          }
+        }
+        touchStartPos = null;
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -396,19 +469,18 @@
         tooltipTitle.textContent = album.title;
         tooltipDate.textContent = `${album.date} · ${album.location}`;
 
-        const svgRect = svg.getBoundingClientRect();
-        const markerX = (pos.x / width) * svgRect.width;
-        const markerY = (pos.y / height) * svgRect.height;
-
-        let tooltipLeft = markerX + 15;
-        let tooltipTop = markerY - 35;
-
+        // Position tooltip relative to container (not SVG viewBox)
         const containerRect = container.getBoundingClientRect();
-        if (tooltipLeft + 200 > containerRect.width) {
-          tooltipLeft = markerX - 200;
+        const touch = e.changedTouches[0];
+        let tooltipLeft = touch.clientX - containerRect.left + 10;
+        let tooltipTop = touch.clientY - containerRect.top - 60;
+
+        // Keep tooltip inside container
+        if (tooltipLeft + 180 > containerRect.width) {
+          tooltipLeft = tooltipLeft - 180;
         }
         if (tooltipTop < 0) {
-          tooltipTop = markerY + 15;
+          tooltipTop = touch.clientY - containerRect.top + 15;
         }
 
         tooltip.style.left = tooltipLeft + 'px';
