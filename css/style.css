@@ -18,8 +18,8 @@
   --color-text: #EAEAEA;
   --color-text-muted: #9A9AB0;
   --color-dark: #0D0D1A;
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-heading: 'Space Grotesk', -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'DM Sans', -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --border-radius: 4px;
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -551,7 +551,7 @@ img {
   border: 1px solid rgba(212, 165, 116, 0.15);
   border-radius: var(--border-radius);
   overflow: hidden;
-  background: radial-gradient(ellipse at center, rgba(15, 52, 96, 0.2) 0%, rgba(13, 13, 26, 0.4) 100%);
+  background: radial-gradient(ellipse at center, rgba(15, 52, 96, 0.35) 0%, rgba(13, 13, 26, 0.7) 100%);
   box-shadow:
     inset 0 0 60px rgba(0, 0, 0, 0.3),
     0 0 30px rgba(15, 52, 96, 0.1);
@@ -584,8 +584,8 @@ img {
 
 /* Map continent paths */
 .travel-map__land {
-  fill: rgba(22, 33, 62, 0.5);
-  stroke: rgba(212, 165, 116, 0.2);
+  fill: rgba(30, 55, 100, 0.6);
+  stroke: rgba(212, 165, 116, 0.35);
   stroke-width: 0.5;
   transition: fill var(--transition);
 }
@@ -692,11 +692,41 @@ img {
   .travel-map__subtitle {
     margin-bottom: 1.2rem;
   }
+
+  .travel-map__marker-dot {
+    r: 7;
+  }
+
+  .travel-map__marker-pulse {
+    r: 7;
+  }
+
+  .travel-map__container {
+    background: radial-gradient(ellipse at center, rgba(15, 52, 96, 0.3) 0%, rgba(13, 13, 26, 0.6) 100%);
+  }
 }
 
 @media (max-width: 480px) {
   .travel-map-section {
     padding: 1.5rem 1rem 1rem;
+  }
+
+  .travel-map__title {
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+  }
+
+  .travel-map__subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+
+  .travel-map__marker-dot {
+    r: 8;
+  }
+
+  .travel-map__marker-pulse {
+    r: 8;
   }
 
   .travel-map__tooltip-img {

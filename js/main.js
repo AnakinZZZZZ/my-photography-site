@@ -115,11 +115,14 @@
     const width = 1000;
     const height = 500;
 
-    // Grid lines removed for cleaner look
-
-    // Try to load accurate map from CDN GeoJSON, fallback to local paths
-    loadGeoJSONMap(svg, width, height).then(() => {
+    // Always render markers regardless of map load success
+    function showMarkers() {
       addMapMarkers(svg, width, height);
+    }
+
+    // Try to load accurate map from CDN, fallback to local paths
+    loadGeoJSONMap(svg, width, height).then(() => {
+      showMarkers();
     }).catch(() => {
       // Fallback: use local worldmap.js paths
       if (typeof WORLD_MAP_PATHS !== 'undefined' && WORLD_MAP_PATHS.length > 0) {
@@ -130,15 +133,18 @@
           svg.appendChild(path);
         });
       }
-      addMapMarkers(svg, width, height);
+      showMarkers();
     });
   }
 
   function loadGeoJSONMap(svg, width, height) {
-    const GEOJSON_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/land-10m.json';
+    const GEOJSON_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/land-50m.json';
 
     return fetch(GEOJSON_URL)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response not ok');
+        return res.json();
+      })
       .then(topology => {
         // Convert TopoJSON to GeoJSON arcs then to SVG paths
         const land = topology.objects.land;
