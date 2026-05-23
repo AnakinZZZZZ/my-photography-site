@@ -99,6 +99,273 @@
   }
 
   // ============================================================
+  // TRAVEL MAP
+  // ============================================================
+
+  function coordToSVG(lat, lng, width, height) {
+    const x = (lng + 180) / 360 * width;
+    const y = (90 - lat) / 180 * height;
+    return { x, y };
+  }
+
+  function renderTravelMap() {
+    const svg = document.getElementById('travelMapSVG');
+    if (!svg) return;
+
+    const width = 1000;
+    const height = 500;
+
+    // Grid lines removed for cleaner look
+
+    // Try to load accurate map from CDN GeoJSON, fallback to local paths
+    loadGeoJSONMap(svg, width, height).then(() => {
+      addMapMarkers(svg, width, height);
+    }).catch(() => {
+      // Fallback: use local worldmap.js paths
+      if (typeof WORLD_MAP_PATHS !== 'undefined' && WORLD_MAP_PATHS.length > 0) {
+        WORLD_MAP_PATHS.forEach(pathData => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathData);
+          path.setAttribute('class', 'travel-map__land');
+          svg.appendChild(path);
+        });
+      }
+      addMapMarkers(svg, width, height);
+    });
+  }
+
+  function loadGeoJSONMap(svg, width, height) {
+    const GEOJSON_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/land-10m.json';
+
+    return fetch(GEOJSON_URL)
+      .then(res => res.json())
+      .then(topology => {
+        // Convert TopoJSON to GeoJSON arcs then to SVG paths
+        const land = topology.objects.land;
+        const arcs = topology.arcs;
+        const transform = topology.transform;
+
+        function decodeArc(arcIndex) {
+          const reverse = arcIndex < 0;
+          const index = reverse ? ~arcIndex : arcIndex;
+          const arc = arcs[index];
+          const coords = [];
+          let x = 0, y = 0;
+          for (let i = 0; i < arc.length; i++) {
+            x += arc[i][0];
+            y += arc[i][1];
+            const lng = x * transform.scale[0] + transform.translate[0];
+            const lat = y * transform.scale[1] + transform.translate[1];
+            coords.push([lng, lat]);
+          }
+          if (reverse) coords.reverse();
+          return coords;
+        }
+
+        function arcsToCoords(arcRefs) {
+          const coords = [];
+          arcRefs.forEach(arcIndex => {
+            const decoded = decodeArc(arcIndex);
+            // Skip first point of subsequent arcs to avoid duplicates
+            const start = coords.length > 0 ? 1 : 0;
+            for (let i = start; i < decoded.length; i++) {
+              coords.push(decoded[i]);
+            }
+          });
+          return coords;
+        }
+
+        function coordsToSVGPaths(ring) {
+          // Split ring at antimeridian crossings to avoid horizontal lines
+          const segments = [];
+          let current = [];
+
+          for (let i = 0; i < ring.length; i++) {
+            const lng = ring[i][0];
+            const lat = ring[i][1];
+
+            // Check if this point crosses the antimeridian from previous point
+            if (i > 0) {
+              const prevLng = ring[i - 1][0];
+              if (Math.abs(lng - prevLng) > 180) {
+                // Antimeridian crossing detected - split here
+                if (current.length >= 3) {
+                  segments.push(current);
+                }
+                current = [];
+              }
+            }
+
+            const sx = ((lng + 180) / 360 * width).toFixed(2);
+            const sy = ((90 - lat) / 180 * height).toFixed(2);
+            current.push(`${sx},${sy}`);
+          }
+
+          if (current.length >= 3) {
+            segments.push(current);
+          }
+
+          // Return array of SVG path strings
+          return segments.map(pts => 'M ' + pts.join(' L ') + ' Z');
+        }
+
+        function addPath(d) {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('class', 'travel-map__land');
+          svg.appendChild(path);
+        }
+
+        function renderGeometry(geom) {
+          if (geom.type === 'Polygon') {
+            geom.arcs.forEach(ring => {
+              const coords = arcsToCoords(ring);
+              const paths = coordsToSVGPaths(coords);
+              paths.forEach(addPath);
+            });
+          } else if (geom.type === 'MultiPolygon') {
+            geom.arcs.forEach(polygon => {
+              polygon.forEach(ring => {
+                const coords = arcsToCoords(ring);
+                const paths = coordsToSVGPaths(coords);
+                paths.forEach(addPath);
+              });
+            });
+          } else if (geom.type === 'GeometryCollection') {
+            geom.geometries.forEach(g => renderGeometry(g));
+          }
+        }
+
+        renderGeometry(land);
+      });
+  }
+
+  function addGridLines(svg, width, height) {
+    for (let i = 1; i < 5; i++) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', '0');
+      line.setAttribute('y1', String(i * (height / 5)));
+      line.setAttribute('x2', String(width));
+      line.setAttribute('y2', String(i * (height / 5)));
+      line.setAttribute('stroke', 'rgba(212, 165, 116, 0.05)');
+      line.setAttribute('stroke-width', '0.5');
+      svg.appendChild(line);
+    }
+    for (let i = 1; i < 10; i++) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', String(i * (width / 10)));
+      line.setAttribute('y1', '0');
+      line.setAttribute('x2', String(i * (width / 10)));
+      line.setAttribute('y2', String(height));
+      line.setAttribute('stroke', 'rgba(212, 165, 116, 0.05)');
+      line.setAttribute('stroke-width', '0.5');
+      svg.appendChild(line);
+    }
+  }
+
+  function addMapMarkers(svg, width, height) {
+
+    // Draw markers for each album with coords
+    const tooltip = document.getElementById('mapTooltip');
+    const tooltipImg = document.getElementById('tooltipImg');
+    const tooltipTitle = document.getElementById('tooltipTitle');
+    const tooltipDate = document.getElementById('tooltipDate');
+    const container = document.querySelector('.travel-map__container');
+
+    ALBUMS.forEach((album, index) => {
+      if (!album.coords) return;
+
+      const pos = coordToSVG(album.coords.lat, album.coords.lng, width, height);
+
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.setAttribute('class', 'travel-map__marker');
+      group.style.animationDelay = `${index * 0.3}s`;
+
+      // Pulse ring
+      const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      pulse.setAttribute('cx', String(pos.x));
+      pulse.setAttribute('cy', String(pos.y));
+      pulse.setAttribute('r', '5');
+      pulse.setAttribute('class', 'travel-map__marker-pulse');
+      pulse.style.animationDelay = `${index * 0.8}s`;
+
+      // Center dot
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', String(pos.x));
+      dot.setAttribute('cy', String(pos.y));
+      dot.setAttribute('r', '5');
+      dot.setAttribute('class', 'travel-map__marker-dot');
+
+      group.appendChild(pulse);
+      group.appendChild(dot);
+      svg.appendChild(group);
+
+      // Hover: show tooltip
+      group.addEventListener('mouseenter', (e) => {
+        tooltipImg.innerHTML = album.cover
+          ? `<img src="${album.cover}" alt="${album.title}">`
+          : '';
+        tooltipTitle.textContent = album.title;
+        tooltipDate.textContent = `${album.date} · ${album.location}`;
+
+        // Position tooltip near marker
+        const rect = container.getBoundingClientRect();
+        const svgRect = svg.getBoundingClientRect();
+        const markerX = (pos.x / width) * svgRect.width;
+        const markerY = (pos.y / height) * svgRect.height;
+
+        let tooltipLeft = markerX + 15;
+        let tooltipTop = markerY - 35;
+
+        // Keep tooltip inside container
+        if (tooltipLeft + 200 > rect.width) {
+          tooltipLeft = markerX - 200;
+        }
+        if (tooltipTop < 0) {
+          tooltipTop = markerY + 15;
+        }
+
+        tooltip.style.left = tooltipLeft + 'px';
+        tooltip.style.top = tooltipTop + 'px';
+        tooltip.classList.add('active');
+      });
+
+      group.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('active');
+      });
+
+      // Click: navigate to album
+      group.addEventListener('click', () => {
+        window.location.href = `album.html?id=${album.id}`;
+      });
+
+      // Mobile: tap to show, tap again to navigate
+      let tapCount = 0;
+      group.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        tapCount++;
+        if (tapCount === 1) {
+          tooltipImg.innerHTML = album.cover
+            ? `<img src="${album.cover}" alt="${album.title}">`
+            : '';
+          tooltipTitle.textContent = album.title;
+          tooltipDate.textContent = `${album.date} · ${album.location}`;
+          const rect = container.getBoundingClientRect();
+          const svgRect = svg.getBoundingClientRect();
+          const markerX = (pos.x / width) * svgRect.width;
+          const markerY = (pos.y / height) * svgRect.height;
+          tooltip.style.left = (markerX + 15) + 'px';
+          tooltip.style.top = (markerY - 35) + 'px';
+          tooltip.classList.add('active');
+          setTimeout(() => { tapCount = 0; }, 2000);
+        } else if (tapCount >= 2) {
+          window.location.href = `album.html?id=${album.id}`;
+        }
+      });
+    });
+  }
+
+  // ============================================================
   // ALBUM PAGE — Masonry + Lightbox
   // ============================================================
   function renderAlbumPage() {
@@ -268,6 +535,7 @@
       renderAlbumPage();
     } else {
       renderHomePage();
+      renderTravelMap();
     }
   }
 
