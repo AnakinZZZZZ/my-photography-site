@@ -233,9 +233,37 @@
   }
 
   // ============================================================
+  // IMAGE PROTECTION
+  // ============================================================
+  function setupImageProtection() {
+    // Disable right-click on images
+    document.addEventListener('contextmenu', function (e) {
+      if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+      }
+    });
+
+    // Disable drag on images
+    document.addEventListener('dragstart', function (e) {
+      if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+      }
+    });
+
+    // Disable long-press save on mobile
+    document.addEventListener('touchstart', function (e) {
+      if (e.target.tagName === 'IMG') {
+        e.target.style.pointerEvents = 'none';
+        setTimeout(() => { e.target.style.pointerEvents = 'auto'; }, 300);
+      }
+    });
+  }
+
+  // ============================================================
   // INIT
   // ============================================================
   function init() {
+    setupImageProtection();
     if (isAlbumPage()) {
       renderAlbumPage();
     } else {

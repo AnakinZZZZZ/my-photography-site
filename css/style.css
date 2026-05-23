@@ -387,6 +387,18 @@ a:hover {
   width: 100%;
   display: block;
   transition: filter var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: auto;
+}
+
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
 }
 
 .masonry-item:hover img {
