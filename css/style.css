@@ -696,11 +696,15 @@ img {
   }
 
   .travel-map__marker-dot {
-    r: 7;
+    r: 10;
   }
 
   .travel-map__marker-pulse {
-    r: 7;
+    r: 10;
+  }
+
+  .travel-map__marker-hit {
+    r: 22;
   }
 
   .travel-map__container {
@@ -724,11 +728,15 @@ img {
   }
 
   .travel-map__marker-dot {
-    r: 8;
+    r: 12;
   }
 
   .travel-map__marker-pulse {
-    r: 8;
+    r: 12;
+  }
+
+  .travel-map__marker-hit {
+    r: 28;
   }
 
   .travel-map__tooltip-img {

@@ -290,11 +290,17 @@
       }
     });
 
-    // Make tooltip clickable on mobile - tap tooltip to navigate
-    tooltip.addEventListener('click', () => {
+    // Tap/click tooltip to navigate to album
+    function navigateToActiveAlbum() {
       if (activeAlbumId) {
         window.location.href = `album.html?id=${activeAlbumId}`;
       }
+    }
+    tooltip.addEventListener('click', navigateToActiveAlbum);
+    tooltip.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      navigateToActiveAlbum();
     });
 
     ALBUMS.forEach((album, index) => {
@@ -305,6 +311,14 @@
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.setAttribute('class', 'travel-map__marker');
       group.style.animationDelay = `${index * 0.3}s`;
+
+      // Invisible larger hit area for easier touch
+      const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      hitArea.setAttribute('cx', String(pos.x));
+      hitArea.setAttribute('cy', String(pos.y));
+      hitArea.setAttribute('r', '20');
+      hitArea.setAttribute('class', 'travel-map__marker-hit');
+      hitArea.setAttribute('fill', 'transparent');
 
       // Pulse ring
       const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -321,6 +335,7 @@
       dot.setAttribute('r', '5');
       dot.setAttribute('class', 'travel-map__marker-dot');
 
+      group.appendChild(hitArea);
       group.appendChild(pulse);
       group.appendChild(dot);
       svg.appendChild(group);
@@ -361,8 +376,11 @@
         activeAlbumId = null;
       });
 
-      // Desktop: click to navigate
-      group.addEventListener('click', () => {
+      // Desktop: click to navigate (only on non-touch devices)
+      group.addEventListener('click', (e) => {
+        // Skip if this was triggered by a touch event
+        if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+        if (window.matchMedia('(hover: none)').matches) return;
         window.location.href = `album.html?id=${album.id}`;
       });
 
