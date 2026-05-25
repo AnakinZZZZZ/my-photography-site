@@ -14,6 +14,7 @@ const SITE_CONFIG = {
   }
 };
 
+// 相册按时间从老到新排序
 const ALBUMS = [
   {
     id: "yunnan-meili",
@@ -28,6 +29,23 @@ const ALBUMS = [
       { src: "images/photos/yunnan-meili/梅里雪山-仙女峰.jpg", caption: "仙女峰" },
       { src: "images/photos/yunnan-meili/梅里雪山-日出.jpg", caption: "日出" },
       { src: "images/photos/yunnan-meili/梅里雪山-雾浓顶.jpg", caption: "雾浓顶" },
+    ]
+  },
+  {
+    id: "new-zealand",
+    title: "新西兰",
+    subtitle: "New Zealand",
+    date: "2024.02",
+    location: "新西兰 / 南岛",
+    cover: "images/photos/new-zealand/孤独的树.jpg",
+    coords: { lat: -44.0, lng: 170.5 },
+    photoCount: 5,
+    photos: [
+      { src: "images/photos/new-zealand/好牧羊人银河.jpg", caption: "好牧羊人银河" },
+      { src: "images/photos/new-zealand/孤独的树.jpg", caption: "孤独的树" },
+      { src: "images/photos/new-zealand/特卡波湖.jpg", caption: "特卡波湖" },
+      { src: "images/photos/new-zealand/皇后镇.jpg", caption: "皇后镇" },
+      { src: "images/photos/new-zealand/皇后镇蒸汽船.jpg", caption: "皇后镇蒸汽船" },
     ]
   },
   {

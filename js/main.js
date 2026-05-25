@@ -335,6 +335,7 @@
 
     // Track which album the tooltip is currently showing (for mobile)
     let activeAlbumId = null;
+    let hideTooltipTimer = null;
 
     // Close tooltip when tapping anywhere else on the map
     container.addEventListener('touchstart', (e) => {
@@ -343,6 +344,20 @@
         tooltip.classList.remove('active');
         activeAlbumId = null;
       }
+    });
+
+    // Keep tooltip visible when mouse enters it (desktop)
+    tooltip.addEventListener('mouseenter', () => {
+      if (hideTooltipTimer) {
+        clearTimeout(hideTooltipTimer);
+        hideTooltipTimer = null;
+      }
+    });
+
+    // Hide tooltip when mouse leaves it (desktop)
+    tooltip.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('active');
+      activeAlbumId = null;
     });
 
     // Tap/click tooltip to navigate to album
@@ -397,24 +412,41 @@
 
       // Desktop: hover to show tooltip
       group.addEventListener('mouseenter', () => {
+        if (hideTooltipTimer) {
+          clearTimeout(hideTooltipTimer);
+          hideTooltipTimer = null;
+        }
         tooltipImg.innerHTML = album.cover
           ? `<img src="${album.cover}" alt="${album.title}">`
           : '';
         tooltipTitle.textContent = album.title;
         tooltipDate.textContent = `${album.date} · ${album.location}`;
 
-        // Position tooltip near marker
+        // Position tooltip near marker, accounting for viewBox
         const svgRect = svg.getBoundingClientRect();
-        const markerX = (pos.x / width) * svgRect.width;
-        const markerY = (pos.y / height) * svgRect.height;
+        const viewBox = svg.getAttribute('viewBox').split(' ').map(Number);
+        const vbX = viewBox[0], vbY = viewBox[1], vbW = viewBox[2], vbH = viewBox[3];
+
+        // Convert SVG coordinates to pixel position relative to container
+        const markerX = ((pos.x - vbX) / vbW) * svgRect.width;
+        const markerY = ((pos.y - vbY) / vbH) * svgRect.height;
+
+        const containerRect = container.getBoundingClientRect();
+        const tooltipW = 200;
+        const tooltipH = 80;
 
         let tooltipLeft = markerX + 15;
         let tooltipTop = markerY - 35;
 
         // Keep tooltip inside container
-        const containerRect = container.getBoundingClientRect();
-        if (tooltipLeft + 200 > containerRect.width) {
-          tooltipLeft = markerX - 200;
+        if (tooltipLeft + tooltipW > containerRect.width) {
+          tooltipLeft = markerX - tooltipW - 10;
+        }
+        if (tooltipLeft < 0) {
+          tooltipLeft = 10;
+        }
+        if (tooltipTop + tooltipH > containerRect.height) {
+          tooltipTop = containerRect.height - tooltipH - 10;
         }
         if (tooltipTop < 0) {
           tooltipTop = markerY + 15;
@@ -427,8 +459,11 @@
       });
 
       group.addEventListener('mouseleave', () => {
-        tooltip.classList.remove('active');
-        activeAlbumId = null;
+        // Delay hiding so mouse can move into tooltip without it disappearing
+        hideTooltipTimer = setTimeout(() => {
+          tooltip.classList.remove('active');
+          activeAlbumId = null;
+        }, 100);
       });
 
       // Desktop: click to navigate (only on non-touch devices)
@@ -469,7 +504,7 @@
         tooltipTitle.textContent = album.title;
         tooltipDate.textContent = `${album.date} · ${album.location}`;
 
-        // Position tooltip relative to container (not SVG viewBox)
+        // Position tooltip relative to container
         const containerRect = container.getBoundingClientRect();
         const touch = e.changedTouches[0];
         let tooltipLeft = touch.clientX - containerRect.left + 10;
@@ -478,6 +513,12 @@
         // Keep tooltip inside container
         if (tooltipLeft + 180 > containerRect.width) {
           tooltipLeft = tooltipLeft - 180;
+        }
+        if (tooltipLeft < 0) {
+          tooltipLeft = 10;
+        }
+        if (tooltipTop + 80 > containerRect.height) {
+          tooltipTop = containerRect.height - 90;
         }
         if (tooltipTop < 0) {
           tooltipTop = touch.clientY - containerRect.top + 15;

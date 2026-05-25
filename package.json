@@ -1,0 +1,13 @@
+{
+  "name": "my-photography-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VOYAGER Photography Portfolio",
+  "scripts": {
+    "compress": "node compress-images.js",
+    "compress:album": "node compress-images.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}
