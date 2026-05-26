@@ -423,6 +423,9 @@ img {
   -moz-user-drag: none;
   -o-user-drag: none;
   user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .masonry-item:hover img {
@@ -476,6 +479,10 @@ img {
   object-fit: contain;
   border-radius: var(--border-radius);
   box-shadow: 0 0 60px rgba(212, 165, 116, 0.1);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
 }
 
 .lightbox__caption {
